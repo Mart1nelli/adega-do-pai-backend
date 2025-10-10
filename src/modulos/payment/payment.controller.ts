@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -12,6 +13,7 @@ export class PaymentController {
     return this.paymentService.create(createPaymentDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.paymentService.findAll();
@@ -27,6 +29,7 @@ export class PaymentController {
     return this.paymentService.update(+id, updatePaymentDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.paymentService.remove(+id);

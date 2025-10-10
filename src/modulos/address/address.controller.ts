@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -12,6 +13,7 @@ export class AddressController {
     return this.addressService.create(createAddressDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.addressService.findAll();

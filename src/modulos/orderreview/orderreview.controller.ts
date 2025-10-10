@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { OrderreviewService } from './orderreview.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { CreateOrderreviewDto } from './dto/create-orderreview.dto';
 import { UpdateOrderreviewDto } from './dto/update-orderreview.dto';
+import { OrderreviewService } from './orderreview.service';
 
 @Controller('orderreview')
 export class OrderreviewController {
@@ -12,6 +13,7 @@ export class OrderreviewController {
     return this.orderreviewService.create(createOrderreviewDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.orderreviewService.findAll();
@@ -27,6 +29,7 @@ export class OrderreviewController {
     return this.orderreviewService.update(+id, updateOrderreviewDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.orderreviewService.remove(+id);

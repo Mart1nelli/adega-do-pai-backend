@@ -1,4 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
+import { Public } from '../../auth/public.decorator';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -12,11 +14,13 @@ export class ReviewController {
     return this.reviewService.create(createReviewDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.reviewService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reviewService.findOne(+id);
@@ -27,6 +31,7 @@ export class ReviewController {
     return this.reviewService.update(+id, updateReviewDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.reviewService.remove(+id);

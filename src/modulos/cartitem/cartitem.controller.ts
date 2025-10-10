@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { CartitemService } from './cartitem.service';
 import { CreateCartitemDto } from './dto/create-cartitem.dto';
 import { UpdateCartitemDto } from './dto/update-cartitem.dto';
@@ -12,6 +13,7 @@ export class CartitemController {
     return this.cartitemService.create(createCartitemDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.cartitemService.findAll();

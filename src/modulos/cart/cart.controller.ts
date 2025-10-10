@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
@@ -12,6 +13,7 @@ export class CartController {
     return this.cartService.create(createCartDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.cartService.findAll();
