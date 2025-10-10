@@ -24,7 +24,17 @@ export class AddressService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas endereços do usuário
+      return this.prisma.address.findMany({
+        where: { userId },
+        include: {
+          user: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.address.findMany({
       include: {
         user: true,
@@ -32,24 +42,31 @@ export class AddressService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const address = await this.prisma.address.findUnique({
       where: { id },
       include: {
         user: true,
       },
     });
+
     if (!address) {
       throw new NotFoundException('Endereço não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && address.userId !== userId) {
+      throw new NotFoundException('Endereço não encontrado');
+    }
+
     return address;
   }
 
-  async update(id: number, updateAddressDto: UpdateAddressDto) {
-    // Verificar se o endereço existe
-    await this.findOne(id);
+  async update(id: number, updateAddressDto: UpdateAddressDto, userId?: number) {
+    // Verificar se o endereço existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
-    // Se userId foi fornecido, verificar se existe
+    // Se userId foi fornecido no DTO, verificar se existe
     if (updateAddressDto.userId) {
       const user = await this.prisma.user.findUnique({
         where: { id: updateAddressDto.userId },
@@ -68,9 +85,9 @@ export class AddressService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o endereço existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o endereço existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.address.delete({
       where: { id },
