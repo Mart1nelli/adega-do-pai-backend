@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '../../auth/roles.decorator';
-import { StockhistoryService } from './stockhistory.service';
 import { CreateStockhistoryDto } from './dto/create-stockhistory.dto';
 import { UpdateStockhistoryDto } from './dto/update-stockhistory.dto';
+import { StockhistoryService } from './stockhistory.service';
 
 @Controller('stockhistory')
 export class StockhistoryController {

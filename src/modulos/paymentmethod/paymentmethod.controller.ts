@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { Roles } from '../../auth/roles.decorator';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Public } from '../../auth/public.decorator';
-import { PaymentmethodService } from './paymentmethod.service';
+import { Roles } from '../../auth/roles.decorator';
 import { CreatePaymentmethodDto } from './dto/create-paymentmethod.dto';
 import { UpdatePaymentmethodDto } from './dto/update-paymentmethod.dto';
+import { PaymentmethodService } from './paymentmethod.service';
 
 @Controller('paymentmethod')
 export class PaymentmethodController {
