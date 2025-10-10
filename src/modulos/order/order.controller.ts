@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderService } from './order.service';
 
 @Controller('order')
 export class OrderController {
@@ -12,6 +13,7 @@ export class OrderController {
     return this.orderService.create(createOrderDto);
   }
 
+  @Roles('admin')
   @Get()
   findAll() {
     return this.orderService.findAll();
@@ -27,6 +29,7 @@ export class OrderController {
     return this.orderService.update(+id, updateOrderDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.orderService.remove(+id);
