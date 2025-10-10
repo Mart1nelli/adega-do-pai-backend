@@ -18,9 +18,10 @@ import { UserModule } from './modulos/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CartitemModule } from './modulos/cartitem/cartitem.module';
 import { OrderitemModule } from './modulos/orderitem/orderitem.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, CategoryModule, SupplierModule, ProductModule, AddressModule, CartModule, OrderModule, PaymentModule, PaymentmethodModule, ReviewModule, OrderreviewModule, StockhistoryModule, NotificationModule, ReportModule, CartitemModule, OrderitemModule],
+  imports: [PrismaModule, UserModule, CategoryModule, SupplierModule, ProductModule, AddressModule, CartModule, OrderModule, PaymentModule, PaymentmethodModule, ReviewModule, OrderreviewModule, StockhistoryModule, NotificationModule, ReportModule, CartitemModule, OrderitemModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
