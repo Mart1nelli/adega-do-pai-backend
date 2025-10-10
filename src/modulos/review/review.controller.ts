@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { Public } from '../../auth/public.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -27,13 +28,15 @@ export class ReviewController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
+  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.reviewService.update(+id, updateReviewDto, userId);
   }
 
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.reviewService.remove(+id, userId);
   }
 }

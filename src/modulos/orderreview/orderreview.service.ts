@@ -33,7 +33,18 @@ export class OrderreviewService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas avaliações do usuário
+      return this.prisma.orderReview.findMany({
+        where: { userId },
+        include: {
+          order: true,
+          user: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.orderReview.findMany({
       include: {
         order: true,
@@ -42,7 +53,7 @@ export class OrderreviewService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const orderReview = await this.prisma.orderReview.findUnique({
       where: { id },
       include: {
@@ -50,15 +61,22 @@ export class OrderreviewService {
         user: true,
       },
     });
+
     if (!orderReview) {
       throw new NotFoundException('Avaliação do pedido não encontrada');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && orderReview.userId !== userId) {
+      throw new NotFoundException('Avaliação do pedido não encontrada');
+    }
+
     return orderReview;
   }
 
-  async update(id: number, updateOrderreviewDto: UpdateOrderreviewDto) {
-    // Verificar se a avaliação do pedido existe
-    await this.findOne(id);
+  async update(id: number, updateOrderreviewDto: UpdateOrderreviewDto, userId?: number) {
+    // Verificar se a avaliação do pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se orderId foi fornecido, verificar se existe
     if (updateOrderreviewDto.orderId) {
@@ -90,9 +108,9 @@ export class OrderreviewService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se a avaliação do pedido existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se a avaliação do pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.orderReview.delete({
       where: { id },

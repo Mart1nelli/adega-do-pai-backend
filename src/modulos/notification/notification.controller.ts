@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -21,19 +22,22 @@ export class NotificationController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notificationService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.notificationService.findOne(+id, userId);
   }
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
-    return this.notificationService.update(+id, updateNotificationDto);
+  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.notificationService.update(+id, updateNotificationDto, userId);
   }
 
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notificationService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.notificationService.remove(+id, userId);
   }
 }

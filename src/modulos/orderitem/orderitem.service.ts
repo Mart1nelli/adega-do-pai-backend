@@ -33,7 +33,22 @@ export class OrderitemService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas itens de pedidos do usuário
+      return this.prisma.orderItem.findMany({
+        where: {
+          order: {
+            userId,
+          },
+        },
+        include: {
+          order: true,
+          product: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.orderItem.findMany({
       include: {
         order: true,
@@ -42,7 +57,7 @@ export class OrderitemService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const orderItem = await this.prisma.orderItem.findUnique({
       where: { id },
       include: {
@@ -50,15 +65,22 @@ export class OrderitemService {
         product: true,
       },
     });
+
     if (!orderItem) {
       throw new NotFoundException('Item do pedido não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade através do pedido
+    if (userId && orderItem.order.userId !== userId) {
+      throw new NotFoundException('Item do pedido não encontrado');
+    }
+
     return orderItem;
   }
 
-  async update(id: number, updateOrderitemDto: UpdateOrderitemDto) {
-    // Verificar se o item do pedido existe
-    await this.findOne(id);
+  async update(id: number, updateOrderitemDto: UpdateOrderitemDto, userId?: number) {
+    // Verificar se o item do pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se orderId foi fornecido, verificar se existe
     if (updateOrderitemDto.orderId) {
@@ -90,9 +112,9 @@ export class OrderitemService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o item do pedido existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o item do pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.orderItem.delete({
       where: { id },

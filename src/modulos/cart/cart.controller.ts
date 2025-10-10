@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -20,17 +21,20 @@ export class CartController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.cartService.findOne(+id, userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.cartService.update(+id, updateCartDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.cartService.remove(+id, userId);
   }
 }

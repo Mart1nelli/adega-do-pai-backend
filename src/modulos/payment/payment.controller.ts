@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -20,18 +21,21 @@ export class PaymentController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.paymentService.findOne(+id, userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
+  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.paymentService.update(+id, updatePaymentDto, userId);
   }
 
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.paymentService.remove(+id, userId);
   }
 }

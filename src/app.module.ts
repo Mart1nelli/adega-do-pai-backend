@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -24,10 +25,39 @@ import { UserModule } from './modulos/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, CategoryModule, SupplierModule, ProductModule, AddressModule, CartModule, OrderModule, PaymentModule, PaymentmethodModule, ReviewModule, OrderreviewModule, StockhistoryModule, NotificationModule, ReportModule, CartitemModule, OrderitemModule, AuthModule],
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minuto
+        limit: 10, // 10 requisições por minuto
+      },
+    ]),
+    PrismaModule, 
+    UserModule, 
+    CategoryModule, 
+    SupplierModule, 
+    ProductModule, 
+    AddressModule, 
+    CartModule, 
+    OrderModule, 
+    PaymentModule, 
+    PaymentmethodModule, 
+    ReviewModule, 
+    OrderreviewModule, 
+    StockhistoryModule, 
+    NotificationModule, 
+    ReportModule, 
+    CartitemModule, 
+    OrderitemModule, 
+    AuthModule
+  ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

@@ -65,11 +65,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      throw new UnauthorizedException('Account is temporarily locked due to too many failed login attempts');
+    }
+
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      // Increment failed attempts
+      await this.handleFailedLogin(user.id);
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Reset failed attempts on successful login
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { failedAttempts: 0, lockUntil: null },
+    });
 
     // Generate JWT
     const payload = { email: user.email, sub: user.id, role: user.role };
@@ -135,8 +148,27 @@ export class AuthService {
       return {
         access_token,
       };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  private async handleFailedLogin(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) return;
+
+    const newFailedAttempts = user.failedAttempts + 1;
+    const lockUntil = newFailedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // 15 minutes lock after 5 attempts
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedAttempts: newFailedAttempts,
+        lockUntil,
+      },
+    });
   }
 }

@@ -33,7 +33,18 @@ export class ReviewService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas avaliações do usuário
+      return this.prisma.review.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          product: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.review.findMany({
       include: {
         user: true,
@@ -42,7 +53,7 @@ export class ReviewService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const review = await this.prisma.review.findUnique({
       where: { id },
       include: {
@@ -50,15 +61,22 @@ export class ReviewService {
         product: true,
       },
     });
+
     if (!review) {
       throw new NotFoundException('Avaliação não encontrada');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && review.userId !== userId) {
+      throw new NotFoundException('Avaliação não encontrada');
+    }
+
     return review;
   }
 
-  async update(id: number, updateReviewDto: UpdateReviewDto) {
-    // Verificar se a avaliação existe
-    await this.findOne(id);
+  async update(id: number, updateReviewDto: UpdateReviewDto, userId?: number) {
+    // Verificar se a avaliação existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se userId foi fornecido, verificar se existe
     if (updateReviewDto.userId) {
@@ -90,9 +108,9 @@ export class ReviewService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se a avaliação existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se a avaliação existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.review.delete({
       where: { id },

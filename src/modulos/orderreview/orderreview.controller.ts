@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateOrderreviewDto } from './dto/create-orderreview.dto';
 import { UpdateOrderreviewDto } from './dto/update-orderreview.dto';
@@ -20,18 +21,21 @@ export class OrderreviewController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderreviewService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.orderreviewService.findOne(+id, userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderreviewDto: UpdateOrderreviewDto) {
-    return this.orderreviewService.update(+id, updateOrderreviewDto);
+  update(@Param('id') id: string, @Body() updateOrderreviewDto: UpdateOrderreviewDto, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.orderreviewService.update(+id, updateOrderreviewDto, userId);
   }
 
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderreviewService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.role === 'admin' ? undefined : user?.userId;
+    return this.orderreviewService.remove(+id, userId);
   }
 }

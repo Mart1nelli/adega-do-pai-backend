@@ -29,7 +29,22 @@ export class CartService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas carrinhos do usuário
+      return this.prisma.cart.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          cartItems: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.cart.findMany({
       include: {
         user: true,
@@ -42,7 +57,7 @@ export class CartService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const cart = await this.prisma.cart.findUnique({
       where: { id },
       include: {
@@ -54,17 +69,24 @@ export class CartService {
         },
       },
     });
+
     if (!cart) {
       throw new NotFoundException('Carrinho não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && cart.userId !== userId) {
+      throw new NotFoundException('Carrinho não encontrado');
+    }
+
     return cart;
   }
 
-  async update(id: number, updateCartDto: UpdateCartDto) {
-    // Verificar se o carrinho existe
-    await this.findOne(id);
+  async update(id: number, updateCartDto: UpdateCartDto, userId?: number) {
+    // Verificar se o carrinho existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
-    // Se userId foi fornecido, verificar se existe
+    // Se userId foi fornecido no DTO, verificar se existe
     if (updateCartDto.userId) {
       const user = await this.prisma.user.findUnique({
         where: { id: updateCartDto.userId },
@@ -88,9 +110,9 @@ export class CartService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o carrinho existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o carrinho existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.cart.delete({
       where: { id },

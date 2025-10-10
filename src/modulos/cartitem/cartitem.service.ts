@@ -33,7 +33,22 @@ export class CartitemService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas itens de carrinhos do usuário
+      return this.prisma.cartItem.findMany({
+        where: {
+          cart: {
+            userId,
+          },
+        },
+        include: {
+          cart: true,
+          product: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.cartItem.findMany({
       include: {
         cart: true,
@@ -42,7 +57,7 @@ export class CartitemService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const cartItem = await this.prisma.cartItem.findUnique({
       where: { id },
       include: {
@@ -50,15 +65,22 @@ export class CartitemService {
         product: true,
       },
     });
+
     if (!cartItem) {
       throw new NotFoundException('Item do carrinho não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade através do carrinho
+    if (userId && cartItem.cart.userId !== userId) {
+      throw new NotFoundException('Item do carrinho não encontrado');
+    }
+
     return cartItem;
   }
 
-  async update(id: number, updateCartitemDto: UpdateCartitemDto) {
-    // Verificar se o item do carrinho existe
-    await this.findOne(id);
+  async update(id: number, updateCartitemDto: UpdateCartitemDto, userId?: number) {
+    // Verificar se o item do carrinho existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se cartId foi fornecido, verificar se existe
     if (updateCartitemDto.cartId) {
@@ -90,9 +112,9 @@ export class CartitemService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o item do carrinho existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o item do carrinho existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.cartItem.delete({
       where: { id },

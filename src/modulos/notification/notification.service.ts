@@ -24,7 +24,17 @@ export class NotificationService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas notificações do usuário
+      return this.prisma.notification.findMany({
+        where: { userId },
+        include: {
+          user: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.notification.findMany({
       include: {
         user: true,
@@ -32,22 +42,29 @@ export class NotificationService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const notification = await this.prisma.notification.findUnique({
       where: { id },
       include: {
         user: true,
       },
     });
+
     if (!notification) {
       throw new NotFoundException('Notificação não encontrada');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && notification.userId !== userId) {
+      throw new NotFoundException('Notificação não encontrada');
+    }
+
     return notification;
   }
 
-  async update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    // Verificar se a notificação existe
-    await this.findOne(id);
+  async update(id: number, updateNotificationDto: UpdateNotificationDto, userId?: number) {
+    // Verificar se a notificação existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se userId foi fornecido, verificar se existe
     if (updateNotificationDto.userId) {
@@ -68,9 +85,9 @@ export class NotificationService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se a notificação existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se a notificação existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.notification.delete({
       where: { id },

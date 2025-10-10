@@ -42,7 +42,19 @@ export class PaymentService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas pagamentos do usuário
+      return this.prisma.payment.findMany({
+        where: { userId },
+        include: {
+          order: true,
+          user: true,
+          method: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.payment.findMany({
       include: {
         order: true,
@@ -52,7 +64,7 @@ export class PaymentService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const payment = await this.prisma.payment.findUnique({
       where: { id },
       include: {
@@ -61,15 +73,22 @@ export class PaymentService {
         method: true,
       },
     });
+
     if (!payment) {
       throw new NotFoundException('Pagamento não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && payment.userId !== userId) {
+      throw new NotFoundException('Pagamento não encontrado');
+    }
+
     return payment;
   }
 
-  async update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    // Verificar se o pagamento existe
-    await this.findOne(id);
+  async update(id: number, updatePaymentDto: UpdatePaymentDto, userId?: number) {
+    // Verificar se o pagamento existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se orderId foi fornecido, verificar se existe
     if (updatePaymentDto.orderId) {
@@ -112,9 +131,9 @@ export class PaymentService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o pagamento existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o pagamento existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.payment.delete({
       where: { id },

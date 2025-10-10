@@ -39,7 +39,24 @@ export class OrderService {
     });
   }
 
-  async findAll() {
+  async findAll(userId?: number) {
+    if (userId) {
+      // Se userId fornecido, retorna apenas pedidos do usuário
+      return this.prisma.order.findMany({
+        where: { userId },
+        include: {
+          user: true,
+          address: true,
+          orderItems: {
+            include: {
+              product: true,
+            },
+          },
+          payments: true,
+        },
+      });
+    }
+    // Admin pode ver todos
     return this.prisma.order.findMany({
       include: {
         user: true,
@@ -54,7 +71,7 @@ export class OrderService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
@@ -68,15 +85,22 @@ export class OrderService {
         payments: true,
       },
     });
+
     if (!order) {
       throw new NotFoundException('Pedido não encontrado');
     }
+
+    // Se userId fornecido, verificar propriedade
+    if (userId && order.userId !== userId) {
+      throw new NotFoundException('Pedido não encontrado');
+    }
+
     return order;
   }
 
-  async update(id: number, updateOrderDto: UpdateOrderDto) {
-    // Verificar se o pedido existe
-    await this.findOne(id);
+  async update(id: number, updateOrderDto: UpdateOrderDto, userId?: number) {
+    // Verificar se o pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     // Se userId foi fornecido, verificar se existe
     if (updateOrderDto.userId) {
@@ -114,9 +138,9 @@ export class OrderService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o pedido existe
-    await this.findOne(id);
+  async remove(id: number, userId?: number) {
+    // Verificar se o pedido existe e pertence ao usuário (se userId fornecido)
+    await this.findOne(id, userId);
 
     return this.prisma.order.delete({
       where: { id },

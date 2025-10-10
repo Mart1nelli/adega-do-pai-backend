@@ -43,7 +43,7 @@ export class UserService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, currentUserId?: number, currentUserRole?: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -56,15 +56,22 @@ export class UserService {
         orderReviews: true,
       },
     });
+
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
     }
+
+    // Se não é admin, verificar se está acessando o próprio perfil
+    if (currentUserRole !== 'admin' && currentUserId && user.id !== currentUserId) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    // Verificar se o usuário existe
-    await this.findOne(id);
+  async update(id: number, updateUserDto: UpdateUserDto, currentUserId?: number, currentUserRole?: string) {
+    // Verificar se o usuário existe e se tem permissão para editar
+    await this.findOne(id, currentUserId, currentUserRole);
 
     return this.prisma.user.update({
       where: { id },
@@ -81,9 +88,9 @@ export class UserService {
     });
   }
 
-  async remove(id: number) {
-    // Verificar se o usuário existe
-    await this.findOne(id);
+  async remove(id: number, currentUserId?: number, currentUserRole?: string) {
+    // Verificar se o usuário existe e se tem permissão para deletar
+    await this.findOne(id, currentUserId, currentUserRole);
 
     return this.prisma.user.delete({
       where: { id },
