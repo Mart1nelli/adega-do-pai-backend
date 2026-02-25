@@ -59,7 +59,35 @@ $ npm run test:cov
 
 ## Deployment
 
+This project now uses the Prisma 7 configuration format, which replaces the `url` property in
+`schema.prisma` with a standalone `prisma.config.ts` file.  The datasource
+connection string is **not** in the schema anymore; instead the config file
+supplies either an `adapter` (direct database URL) or `accelerateUrl`.
+
+The `DATABASE_URL` environment variable continues to be the canonical source
+of truth, and the Docker setup passes it to the container. The Prisma CLI
+commands (`npx prisma migrate deploy`, `npx prisma generate`, etc.) read the
+url from `prisma.config.ts` automatically.  Because the `@prisma/config` types
+currently only support a plain `url` field, we still set `url` there even
+though the runtime client accepts an `adapter`/`accelerateUrl`.  You can
+update `prisma.config.ts` to use `accelerateUrl` when you switch to Prisma
+Accelerate and the types have been updated.
+
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+### Docker / compose setup
+
+This repo includes a `Dockerfile` and the root `docker-compose.yml` which starts a Postgres database plus backend and frontend services. To bring up the full stack:
+
+```bash
+# from the repository root
+docker-compose up --build
+```
+
+* backend listens on `3000`, frontend on `4200` (mapped to container port 80).  Database credentials are defined in the compose file; override via `.env` or editing if needed.
+* the backend container runs `npm ci --legacy-peer-deps && npx prisma generate` during build and then `npx prisma migrate deploy` before starting, so dependencies install cleanly and the schema is applied automatically. Prisma will read the `DATABASE_URL` value from the environment via `prisma.config.ts`.
+
+For development you can mount the backend directory and use `npm run start:dev` instead of rebuilding, see comments in compose file.
 
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
