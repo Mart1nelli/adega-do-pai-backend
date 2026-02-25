@@ -6,6 +6,6 @@ import { OrderitemService } from './orderitem.service';
 @Module({
   imports: [PrismaModule],
   controllers: [OrderitemController],
-  providers: [OrderitemService]
+  providers: [OrderitemService],
 })
 export class OrderitemModule {}

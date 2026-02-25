@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CartitemService } from './cartitem.service';
@@ -27,7 +36,11 @@ export class CartitemController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateCartitemDto: UpdateCartitemDto, @CurrentUser() user?: any) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCartitemDto: UpdateCartitemDto,
+    @CurrentUser() user?: any,
+  ) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
     return this.cartitemService.update(id, updateCartitemDto, userId);
   }

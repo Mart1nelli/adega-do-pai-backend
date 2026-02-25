@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Public } from '../../auth/public.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CategoryService } from './category.service';
@@ -29,7 +37,10 @@ export class CategoryController {
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoryService.update(+id, updateCategoryDto);
   }
 

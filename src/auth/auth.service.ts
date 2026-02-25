@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,7 +15,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async register(registerDto: RegisterDto) {
     const { email, password, name, phone } = registerDto;
@@ -41,14 +45,17 @@ export class AuthService {
     // Generate JWT
     const payload = { email: user.email, sub: user.id, role: user.role };
     const access_token = this.jwtService.sign(payload);
+    const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
       access_token,
+      refresh_token,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
+        phone: user.phone,
       },
     };
   }
@@ -67,7 +74,9 @@ export class AuthService {
 
     // Check if account is locked
     if (user.lockUntil && user.lockUntil > new Date()) {
-      throw new UnauthorizedException('Account is temporarily locked due to too many failed login attempts');
+      throw new UnauthorizedException(
+        'Account is temporarily locked due to too many failed login attempts',
+      );
     }
 
     // Check password
@@ -97,8 +106,20 @@ export class AuthService {
         email: user.email,
         name: user.name,
         role: user.role,
+        phone: user.phone,
       },
     };
+  }
+
+  async getMe(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, role: true, phone: true },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
   }
 
   async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {
@@ -114,7 +135,10 @@ export class AuthService {
     }
 
     // Check current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
@@ -161,7 +185,8 @@ export class AuthService {
     if (!user) return;
 
     const newFailedAttempts = user.failedAttempts + 1;
-    const lockUntil = newFailedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // 15 minutes lock after 5 attempts
+    const lockUntil =
+      newFailedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // 15 minutes lock after 5 attempts
 
     await this.prisma.user.update({
       where: { id: userId },

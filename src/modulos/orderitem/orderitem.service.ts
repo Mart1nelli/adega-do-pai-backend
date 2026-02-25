@@ -78,7 +78,11 @@ export class OrderitemService {
     return orderItem;
   }
 
-  async update(id: number, updateOrderitemDto: UpdateOrderitemDto, userId?: number) {
+  async update(
+    id: number,
+    updateOrderitemDto: UpdateOrderitemDto,
+    userId?: number,
+  ) {
     // Verificar se o item do pedido existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

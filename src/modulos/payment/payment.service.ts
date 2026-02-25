@@ -86,7 +86,11 @@ export class PaymentService {
     return payment;
   }
 
-  async update(id: number, updatePaymentDto: UpdatePaymentDto, userId?: number) {
+  async update(
+    id: number,
+    updatePaymentDto: UpdatePaymentDto,
+    userId?: number,
+  ) {
     // Verificar se o pagamento existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

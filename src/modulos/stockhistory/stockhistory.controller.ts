@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateStockhistoryDto } from './dto/create-stockhistory.dto';
 import { UpdateStockhistoryDto } from './dto/update-stockhistory.dto';
@@ -28,7 +36,10 @@ export class StockhistoryController {
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStockhistoryDto: UpdateStockhistoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateStockhistoryDto: UpdateStockhistoryDto,
+  ) {
     return this.stockhistoryService.update(+id, updateStockhistoryDto);
   }
 

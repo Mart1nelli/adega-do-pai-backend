@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { AddressService } from './address.service';
@@ -22,13 +30,22 @@ export class AddressController {
     return this.addressService.findAll();
   }
 
+  @Get('mine')
+  findMine(@CurrentUser() user: any) {
+    return this.addressService.findAll(user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: any) {
     return this.addressService.findOne(+id, user.userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto, @CurrentUser() user: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAddressDto: UpdateAddressDto,
+    @CurrentUser() user: any,
+  ) {
     return this.addressService.update(+id, updateAddressDto, user.userId);
   }
 

@@ -74,7 +74,11 @@ export class OrderreviewService {
     return orderReview;
   }
 
-  async update(id: number, updateOrderreviewDto: UpdateOrderreviewDto, userId?: number) {
+  async update(
+    id: number,
+    updateOrderreviewDto: UpdateOrderreviewDto,
+    userId?: number,
+  ) {
     // Verificar se a avaliação do pedido existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

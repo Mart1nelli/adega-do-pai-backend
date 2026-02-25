@@ -17,7 +17,10 @@ export class AddressService {
     }
 
     return this.prisma.address.create({
-      data: createAddressDto,
+      data: {
+        ...createAddressDto,
+        userId: createAddressDto.userId!,
+      },
       include: {
         user: true,
       },
@@ -62,7 +65,11 @@ export class AddressService {
     return address;
   }
 
-  async update(id: number, updateAddressDto: UpdateAddressDto, userId?: number) {
+  async update(
+    id: number,
+    updateAddressDto: UpdateAddressDto,
+    userId?: number,
+  ) {
     // Verificar se o endereço existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

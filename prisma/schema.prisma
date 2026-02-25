@@ -37,15 +37,18 @@ model User {
 }
 
 model Address {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  street    String
-  city      String
-  state     String
-  zipCode   String
-  country   String   @default("Brazil")
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  street       String
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String
+  state        String
+  zipCode      String
+  country      String   @default("Brazil")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]

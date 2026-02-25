@@ -78,7 +78,11 @@ export class CartitemService {
     return cartItem;
   }
 
-  async update(id: number, updateCartitemDto: UpdateCartitemDto, userId?: number) {
+  async update(
+    id: number,
+    updateCartitemDto: UpdateCartitemDto,
+    userId?: number,
+  ) {
     // Verificar se o item do carrinho existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

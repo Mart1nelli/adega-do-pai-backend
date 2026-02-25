@@ -62,14 +62,23 @@ export class UserService {
     }
 
     // Se não é admin, verificar se está acessando o próprio perfil
-    if (currentUserRole !== 'admin' && currentUserId && user.id !== currentUserId) {
+    if (
+      currentUserRole !== 'admin' &&
+      currentUserId &&
+      user.id !== currentUserId
+    ) {
       throw new NotFoundException('Usuário não encontrado');
     }
 
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto, currentUserId?: number, currentUserRole?: string) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    currentUserId?: number,
+    currentUserRole?: string,
+  ) {
     // Verificar se o usuário existe e se tem permissão para editar
     await this.findOne(id, currentUserId, currentUserRole);
 

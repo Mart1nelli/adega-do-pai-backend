@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Public } from '../../auth/public.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
@@ -29,7 +37,10 @@ export class SupplierController {
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSupplierDto: UpdateSupplierDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSupplierDto: UpdateSupplierDto,
+  ) {
     return this.supplierService.update(+id, updateSupplierDto);
   }
 

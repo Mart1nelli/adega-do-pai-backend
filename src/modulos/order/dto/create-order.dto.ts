@@ -1,13 +1,34 @@
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
-export class CreateOrderDto {
+export class OrderItemInputDto {
   @IsNotEmpty()
   @IsInt()
-  userId: number;
+  productId: number;
 
   @IsNotEmpty()
+  @IsInt()
+  quantity: number;
+}
+
+export class CreateOrderDto {
+  // Will be overridden by controller from JWT
+  @IsOptional()
+  @IsInt()
+  userId?: number;
+
+  // Optional: will be computed from items if provided
+  @IsOptional()
   @IsNumber()
-  totalAmount: number;
+  totalAmount?: number;
 
   @IsOptional()
   @IsString()
@@ -16,4 +37,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsInt()
   addressId: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemInputDto)
+  items?: OrderItemInputDto[];
 }

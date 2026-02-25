@@ -1,7 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { Public } from '../../auth/public.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
 
@@ -17,8 +27,8 @@ export class ProductController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  findAll(@Query() query: QueryProductDto) {
+    return this.productService.findAll(query);
   }
 
   @Public()

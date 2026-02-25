@@ -29,27 +29,27 @@ import { PrismaModule } from './prisma/prisma.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minuto
-        limit: 10, // 10 requisições por minuto
+        limit: 60, // 60 requisições por minuto
       },
     ]),
-    PrismaModule, 
-    UserModule, 
-    CategoryModule, 
-    SupplierModule, 
-    ProductModule, 
-    AddressModule, 
-    CartModule, 
-    OrderModule, 
-    PaymentModule, 
-    PaymentmethodModule, 
-    ReviewModule, 
-    OrderreviewModule, 
-    StockhistoryModule, 
-    NotificationModule, 
-    ReportModule, 
-    CartitemModule, 
-    OrderitemModule, 
-    AuthModule
+    PrismaModule,
+    UserModule,
+    CategoryModule,
+    SupplierModule,
+    ProductModule,
+    AddressModule,
+    CartModule,
+    OrderModule,
+    PaymentModule,
+    PaymentmethodModule,
+    ReviewModule,
+    OrderreviewModule,
+    StockhistoryModule,
+    NotificationModule,
+    ReportModule,
+    CartitemModule,
+    OrderitemModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -69,4 +69,3 @@ import { PrismaModule } from './prisma/prisma.module';
   ],
 })
 export class AppModule {}
- 

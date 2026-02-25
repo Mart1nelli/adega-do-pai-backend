@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -10,7 +18,9 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
+  create(@Body() createOrderDto: CreateOrderDto, @CurrentUser() user: any) {
+    // Override userId from JWT to prevent users creating orders for others
+    createOrderDto.userId = user.userId;
     return this.orderService.create(createOrderDto);
   }
 
@@ -20,6 +30,11 @@ export class OrderController {
     return this.orderService.findAll();
   }
 
+  @Get('my')
+  findMyOrders(@CurrentUser() user: any) {
+    return this.orderService.findAll(user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user?: any) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
@@ -27,7 +42,11 @@ export class OrderController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto, @CurrentUser() user?: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+    @CurrentUser() user?: any,
+  ) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
     return this.orderService.update(+id, updateOrderDto, userId);
   }

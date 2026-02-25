@@ -62,7 +62,11 @@ export class NotificationService {
     return notification;
   }
 
-  async update(id: number, updateNotificationDto: UpdateNotificationDto, userId?: number) {
+  async update(
+    id: number,
+    updateNotificationDto: UpdateNotificationDto,
+    userId?: number,
+  ) {
     // Verificar se a notificação existe e pertence ao usuário (se userId fornecido)
     await this.findOne(id, userId);
 

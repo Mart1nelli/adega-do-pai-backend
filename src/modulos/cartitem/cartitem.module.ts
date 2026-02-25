@@ -6,6 +6,6 @@ import { CartitemService } from './cartitem.service';
 @Module({
   imports: [PrismaModule],
   controllers: [CartitemController],
-  providers: [CartitemService]
+  providers: [CartitemService],
 })
 export class CartitemModule {}

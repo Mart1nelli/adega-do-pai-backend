@@ -7,7 +7,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     // Prisma v7 requires a driver adapter for direct DB connections.
     // PrismaPg uses the `pg` library under the hood — no url in schema.prisma needed.
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL,
+    });
     super({ adapter });
   }
 

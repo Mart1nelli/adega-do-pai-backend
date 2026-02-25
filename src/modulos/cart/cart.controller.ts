@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CartService } from './cart.service';
@@ -10,7 +18,9 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post()
-  create(@Body() createCartDto: CreateCartDto) {
+  create(@Body() createCartDto: CreateCartDto, @CurrentUser() user: any) {
+    // Override userId from JWT to prevent users creating carts for others
+    createCartDto.userId = user.userId;
     return this.cartService.create(createCartDto);
   }
 
@@ -20,6 +30,11 @@ export class CartController {
     return this.cartService.findAll();
   }
 
+  @Get('mine')
+  findMine(@CurrentUser() user: any) {
+    return this.cartService.findAll(user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user?: any) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
@@ -27,7 +42,11 @@ export class CartController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto, @CurrentUser() user?: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCartDto: UpdateCartDto,
+    @CurrentUser() user?: any,
+  ) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
     return this.cartService.update(+id, updateCartDto, userId);
   }

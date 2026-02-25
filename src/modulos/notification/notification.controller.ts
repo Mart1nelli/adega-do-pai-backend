@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -29,7 +37,11 @@ export class NotificationController {
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto, @CurrentUser() user?: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateNotificationDto: UpdateNotificationDto,
+    @CurrentUser() user?: any,
+  ) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
     return this.notificationService.update(+id, updateNotificationDto, userId);
   }

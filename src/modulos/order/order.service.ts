@@ -8,9 +8,11 @@ export class OrderService {
   constructor(private prisma: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto) {
+    const { items, ...orderData } = createOrderDto;
+
     // Verificar se o usuário existe
     const user = await this.prisma.user.findUnique({
-      where: { id: createOrderDto.userId },
+      where: { id: orderData.userId },
     });
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
@@ -18,16 +20,56 @@ export class OrderService {
 
     // Verificar se o endereço existe
     const address = await this.prisma.address.findUnique({
-      where: { id: createOrderDto.addressId },
+      where: { id: orderData.addressId },
     });
     if (!address) {
       throw new NotFoundException('Endereço não encontrado');
     }
 
+    // Se items foram fornecidos, calcular totalAmount a partir dos preços reais do BD
+    let totalAmount = orderData.totalAmount ?? 0;
+    if (items && items.length > 0) {
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: items.map((i) => i.productId) } },
+      });
+
+      totalAmount = items.reduce((sum, item) => {
+        const product = products.find((p) => p.id === item.productId);
+        if (!product)
+          throw new NotFoundException(
+            `Produto ${item.productId} não encontrado`,
+          );
+        return sum + product.price * item.quantity;
+      }, 0);
+    }
+
     return this.prisma.order.create({
-      data: createOrderDto,
+      data: {
+        userId: orderData.userId!,
+        totalAmount,
+        status: orderData.status ?? 'pending',
+        addressId: orderData.addressId,
+        ...(items && items.length > 0
+          ? {
+              orderItems: {
+                create: await Promise.all(
+                  items.map(async (item) => {
+                    const product = await this.prisma.product.findUnique({
+                      where: { id: item.productId },
+                    });
+                    return {
+                      productId: item.productId,
+                      quantity: item.quantity,
+                      price: product!.price,
+                    };
+                  }),
+                ),
+              },
+            }
+          : {}),
+      },
       include: {
-        user: true,
+        user: { select: { id: true, name: true, email: true } },
         address: true,
         orderItems: {
           include: {

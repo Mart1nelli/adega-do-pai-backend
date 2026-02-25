@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../auth/roles.decorator';
 import { CreatePaymentDto } from './dto/create-payment.dto';
@@ -27,7 +35,11 @@ export class PaymentController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto, @CurrentUser() user?: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePaymentDto: UpdatePaymentDto,
+    @CurrentUser() user?: any,
+  ) {
     const userId = user?.role === 'admin' ? undefined : user?.userId;
     return this.paymentService.update(+id, updatePaymentDto, userId);
   }

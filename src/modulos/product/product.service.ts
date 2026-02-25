@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
@@ -33,14 +34,58 @@ export class ProductService {
     });
   }
 
-  async findAll() {
-    return this.prisma.product.findMany({
-      include: {
-        category: true,
-        supplier: true,
-        reviews: true,
-      },
-    });
+  async findAll(query: QueryProductDto = {}) {
+    const {
+      search,
+      categoryId,
+      minPrice,
+      maxPrice,
+      page = 1,
+      limit = 12,
+    } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          supplier: true,
+          reviews: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number) {

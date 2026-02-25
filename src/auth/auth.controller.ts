@@ -24,15 +24,14 @@ export class AuthController {
 
   @Get('me')
   getProfile(@Request() req: any) {
-    return {
-      id: req.user.userId,
-      email: req.user.email,
-      role: req.user.role,
-    };
+    return this.authService.getMe(req.user.userId);
   }
 
   @Patch('change-password')
-  async changePassword(@Request() req: any, @Body() changePasswordDto: ChangePasswordDto) {
+  async changePassword(
+    @Request() req: any,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
     return this.authService.changePassword(req.user.userId, changePasswordDto);
   }
 
